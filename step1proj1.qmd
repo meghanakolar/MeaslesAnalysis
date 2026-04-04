@@ -1,9 +1,11 @@
 ---
-title: "Untitled"
+title: "Measles Dataset Project 1 Checkpoint 1"
 format: html
 editor: visual
 ---
 
 ## Data
 
-My dataset...
+My data set is the Measles data set. This data comes from the WHO, and contains information about provisional monthly measles and rubella data from 2025. Some of the variables include suspected measles cases, their connection to rubella, and total cases. There are two different sets of data- one for cases by month, and one for cases by year.
+
+The cleaning that had to be done was cleaning variable names and fixing data types. They renamed rows from the cases_year data frame to better represent what it stood for, as well as turning some of the data from the cases_month data frame into numeric data. They also deleted the first row of data and made the data into a year level for the cases_year data frame.
