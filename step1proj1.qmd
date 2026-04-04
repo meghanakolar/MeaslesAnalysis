@@ -18,7 +18,7 @@ The cleaning that had to be done was cleaning variable names and fixing data typ
 
 **Research Questions:**
 
-1.  How have measles cases changed over time by country, for the top 7 countries with measles cases?
+1.  How have measles cases changed over time by country, for the top 5 countries with measles cases?
 
     I would use the cases_year data frame to answer this question, looking at the year and region variables, as well as the measles cases variables.
 
@@ -38,6 +38,5 @@ The cleaning that had to be done was cleaning variable names and fixing data typ
 
 **Sketches of Visualizations:**
 
-1.  How have measles cases changed over time by country, for the top 7 countries with measles cases?
-
-2.  How does the county's socioeconomic status affect the amount of measles cases throughout a year?
+1.  How have measles cases changed over time by country, for the top 5 countries with measles cases?
+2.  How does the county's socioeconomic status affect the amount of measles cases throughout a year? ![](images/visualizations-1.jpg)
