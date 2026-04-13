@@ -191,60 +191,61 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><p>Afterwards, we wrote a custom function summarise_leadership_gender_gap() that uses an input grouping variable to group the data before calculating proportions of female and male monarchs and presidents, their average accession ages, and the difference in those proportions and ages.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># creating our new variables</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>democracy_data <span class="ot">&lt;-</span> democracy_data <span class="sc">|&gt;</span></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">president_age_at_accession =</span> president_accesion_year <span class="sc">-</span> president_birthyear,</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">monarch_age_at_accession =</span> monarch_accession_year <span class="sc">-</span> monarch_birthyear,</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">has_female_leader =</span> <span class="fu">ifelse</span>(is_female_president <span class="sc">|</span> is_female_monarch, <span class="dv">1</span>, <span class="dv">0</span>),</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">decade =</span> <span class="fu">ifelse</span>(year <span class="sc">&lt;</span> <span class="dv">1960</span>, <span class="st">"1950-1959"</span>,</span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>       <span class="fu">ifelse</span>(year <span class="sc">&lt;</span> <span class="dv">1970</span>, <span class="st">"1960-1969"</span>,</span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>       <span class="fu">ifelse</span>(year <span class="sc">&lt;</span> <span class="dv">1980</span>, <span class="st">"1970-1979"</span>,</span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>       <span class="fu">ifelse</span>(year <span class="sc">&lt;</span> <span class="dv">1990</span>, <span class="st">"1980-1989"</span>,</span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>       <span class="fu">ifelse</span>(year <span class="sc">&lt;</span> <span class="dv">2000</span>, <span class="st">"1990-1999"</span>,</span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>       <span class="fu">ifelse</span>(year <span class="sc">&lt;</span> <span class="dv">2010</span>, <span class="st">"2000-2009"</span>,</span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>                           <span class="st">"2010-2020"</span>)))))))</span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="co"># writing our custom function</span></span>
-<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>summarise_leadership_gender_gap <span class="ot">&lt;-</span> <span class="cf">function</span>(group_var) {</span>
-<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>  democracy_data <span class="sc">|&gt;</span> </span>
-<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(democracy_data[[group_var]])) <span class="sc">|&gt;</span></span>
-<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>    <span class="co"># grouping data by specified grouping variable</span></span>
-<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(<span class="fu">across</span>(<span class="fu">all_of</span>(group_var))) <span class="sc">|&gt;</span></span>
-<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarise</span>(<span class="at">n =</span> <span class="fu">n</span>(),</span>
-<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>      <span class="co"># calculating proportions of female and male presidents</span></span>
-<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>      <span class="at">prop_female_president =</span> <span class="fu">mean</span>(</span>
-<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>        <span class="fu">ifelse</span>(<span class="sc">!</span>is_monarchy, is_female_president, <span class="cn">NA</span>), <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>      <span class="at">prop_male_president =</span> <span class="fu">mean</span>(</span>
-<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>        <span class="fu">ifelse</span>(<span class="sc">!</span>is_monarchy, <span class="sc">!</span>is_female_president, <span class="cn">NA</span>), <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>      <span class="co"># calculating difference in proportions of male presidents and female presidents (male - female)</span></span>
-<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>      <span class="at">gap_president_prop =</span> prop_male_president <span class="sc">-</span> prop_female_president,</span>
-<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>      <span class="co"># calculating the average accession ages for female and male presidents</span></span>
-<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>      <span class="at">avg_accession_age_female_president =</span> <span class="fu">mean</span>(</span>
-<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>        president_age_at_accession[is_presidential <span class="sc">&amp;</span> is_female_president], <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>      <span class="at">avg_accession_age_male_president =</span> <span class="fu">mean</span>(</span>
-<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>        president_age_at_accession[is_presidential <span class="sc">&amp;</span> <span class="sc">!</span>is_female_president], <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>      <span class="co"># calculating difference in average accession ages of male and female presidents (male - female)</span></span>
-<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>      <span class="at">gap_president_accession_age =</span> avg_accession_age_male_president <span class="sc">-</span> avg_accession_age_female_president,</span>
-<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>      <span class="co"># calculating proportions of female and male monarchs</span></span>
-<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>      <span class="at">prop_female_monarch =</span> <span class="fu">mean</span>(</span>
-<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>        <span class="fu">ifelse</span>(is_monarchy, is_female_monarch, <span class="cn">NA</span>), <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a>      <span class="at">prop_male_monarch =</span> <span class="fu">mean</span>(</span>
-<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a>        <span class="fu">ifelse</span>(is_monarchy, <span class="sc">!</span>is_female_monarch, <span class="cn">NA</span>), <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a>      <span class="co"># calculating difference in proportions of male monarchs and female monarchs (male - female)</span></span>
-<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a>      <span class="at">gap_monarch_prop =</span> prop_male_monarch <span class="sc">-</span> prop_female_monarch,</span>
-<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a>      <span class="co"># calculating the average accession ages for female and male monarchs</span></span>
-<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a>      <span class="at">avg_accession_age_female_monarch =</span> <span class="fu">mean</span>(</span>
-<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a>        monarch_age_at_accession[is_monarchy <span class="sc">&amp;</span> is_female_monarch], <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a>      <span class="at">avg_accession_age_male_monarch =</span> <span class="fu">mean</span>(</span>
-<span id="cb8-48"><a href="#cb8-48" aria-hidden="true" tabindex="-1"></a>        monarch_age_at_accession[is_monarchy <span class="sc">&amp;</span> <span class="sc">!</span>is_female_monarch], <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb8-49"><a href="#cb8-49" aria-hidden="true" tabindex="-1"></a>      <span class="co"># calculating difference in average accession ages of male and female monarchs (male - female)</span></span>
-<span id="cb8-50"><a href="#cb8-50" aria-hidden="true" tabindex="-1"></a>      <span class="at">gap_monarch_accession_age =</span></span>
-<span id="cb8-51"><a href="#cb8-51" aria-hidden="true" tabindex="-1"></a>        avg_accession_age_male_monarch <span class="sc">-</span> avg_accession_age_female_monarch,</span>
-<span id="cb8-52"><a href="#cb8-52" aria-hidden="true" tabindex="-1"></a>      <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
-<span id="cb8-53"><a href="#cb8-53" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co"># creating our new variables</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>democracy_data <span class="ot">&lt;-</span> democracy_data <span class="sc">|&gt;</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">president_age_at_accession =</span> president_accesion_year <span class="sc">-</span> president_birthyear,</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">monarch_age_at_accession =</span> monarch_accession_year <span class="sc">-</span> monarch_birthyear,</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">has_female_leader =</span> <span class="fu">ifelse</span>(is_female_president <span class="sc">|</span> is_female_monarch, <span class="dv">1</span>, <span class="dv">0</span>),</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">decade =</span> <span class="fu">ifelse</span>(year <span class="sc">&lt;</span> <span class="dv">1960</span>, <span class="st">"1950-1959"</span>,</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>       <span class="fu">ifelse</span>(year <span class="sc">&lt;</span> <span class="dv">1970</span>, <span class="st">"1960-1969"</span>,</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>       <span class="fu">ifelse</span>(year <span class="sc">&lt;</span> <span class="dv">1980</span>, <span class="st">"1970-1979"</span>,</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>       <span class="fu">ifelse</span>(year <span class="sc">&lt;</span> <span class="dv">1990</span>, <span class="st">"1980-1989"</span>,</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>       <span class="fu">ifelse</span>(year <span class="sc">&lt;</span> <span class="dv">2000</span>, <span class="st">"1990-1999"</span>,</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>       <span class="fu">ifelse</span>(year <span class="sc">&lt;</span> <span class="dv">2010</span>, <span class="st">"2000-2009"</span>,</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>                           <span class="st">"2010-2020"</span>)))))))</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="co"># writing our custom function</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>summarise_leadership_gender_gap <span class="ot">&lt;-</span> <span class="cf">function</span>(group_var) {</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>  democracy_data <span class="sc">|&gt;</span> </span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(democracy_data[[group_var]])) <span class="sc">|&gt;</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>    <span class="co"># grouping data by specified grouping variable</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(<span class="fu">across</span>(<span class="fu">all_of</span>(group_var))) <span class="sc">|&gt;</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarise</span>(<span class="at">n =</span> <span class="fu">n</span>(),</span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>      <span class="co"># calculating proportions of female and male presidents</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>      <span class="at">prop_female_president =</span> <span class="fu">mean</span>(</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>        <span class="fu">ifelse</span>(<span class="sc">!</span>is_monarchy, is_female_president, <span class="cn">NA</span>), <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>      <span class="at">prop_male_president =</span> <span class="fu">mean</span>(</span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>        <span class="fu">ifelse</span>(<span class="sc">!</span>is_monarchy, <span class="sc">!</span>is_female_president, <span class="cn">NA</span>), <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>      <span class="co"># calculating difference in proportions of male presidents and female presidents (male - female)</span></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>      <span class="at">gap_president_prop =</span> prop_male_president <span class="sc">-</span> prop_female_president,</span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>      <span class="co"># calculating the average accession ages for female and male presidents</span></span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>      <span class="at">avg_accession_age_female_president =</span> <span class="fu">mean</span>(</span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>        president_age_at_accession[is_presidential <span class="sc">&amp;</span> is_female_president], <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>      <span class="at">avg_accession_age_male_president =</span> <span class="fu">mean</span>(</span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>        president_age_at_accession[is_presidential <span class="sc">&amp;</span> <span class="sc">!</span>is_female_president], <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>      <span class="co"># calculating difference in average accession ages of male and female presidents (male - female)</span></span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>      <span class="at">gap_president_accession_age =</span> avg_accession_age_male_president <span class="sc">-</span> avg_accession_age_female_president,</span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>      <span class="co"># calculating proportions of female and male monarchs</span></span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>      <span class="at">prop_female_monarch =</span> <span class="fu">mean</span>(</span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a>        <span class="fu">ifelse</span>(is_monarchy, is_female_monarch, <span class="cn">NA</span>), <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a>      <span class="at">prop_male_monarch =</span> <span class="fu">mean</span>(</span>
+<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a>        <span class="fu">ifelse</span>(is_monarchy, <span class="sc">!</span>is_female_monarch, <span class="cn">NA</span>), <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a>      <span class="co"># calculating difference in proportions of male monarchs and female monarchs (male - female)</span></span>
+<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a>      <span class="at">gap_monarch_prop =</span> prop_male_monarch <span class="sc">-</span> prop_female_monarch,</span>
+<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a>      <span class="co"># calculating the average accession ages for female and male monarchs</span></span>
+<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a>      <span class="at">avg_accession_age_female_monarch =</span> <span class="fu">mean</span>(</span>
+<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a>        monarch_age_at_accession[is_monarchy <span class="sc">&amp;</span> is_female_monarch], <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb8-48"><a href="#cb8-48" aria-hidden="true" tabindex="-1"></a>      <span class="at">avg_accession_age_male_monarch =</span> <span class="fu">mean</span>(</span>
+<span id="cb8-49"><a href="#cb8-49" aria-hidden="true" tabindex="-1"></a>        monarch_age_at_accession[is_monarchy <span class="sc">&amp;</span> <span class="sc">!</span>is_female_monarch], <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb8-50"><a href="#cb8-50" aria-hidden="true" tabindex="-1"></a>      <span class="co"># calculating difference in average accession ages of male and female monarchs (male - female)</span></span>
+<span id="cb8-51"><a href="#cb8-51" aria-hidden="true" tabindex="-1"></a>      <span class="at">gap_monarch_accession_age =</span></span>
+<span id="cb8-52"><a href="#cb8-52" aria-hidden="true" tabindex="-1"></a>        avg_accession_age_male_monarch <span class="sc">-</span> avg_accession_age_female_monarch,</span>
+<span id="cb8-53"><a href="#cb8-53" aria-hidden="true" tabindex="-1"></a>      <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
+<span id="cb8-54"><a href="#cb8-54" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>We can add any variable from the dataset as a grouping variable. For example, we could input is_democracy or has_free_and_fair_election instead of era to see the different values for democratic vs non-democratic countries or countries with and without free and fair elections.</p></li>
+<p>We can add any variable from the dataset as a grouping variable. For example, we could input is_democracy to see the different values for democratic vs non-democratic countries or countries with and without free and fair elections.</p></li>
 </ul>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summarise_leadership_gender_gap</span>(<span class="st">"is_democracy"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -261,22 +262,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 #   avg_accession_age_female_monarch &lt;dbl&gt;,
 #   avg_accession_age_male_monarch &lt;dbl&gt;, gap_monarch_accession_age &lt;dbl&gt;</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summarise_leadership_gender_gap</span>(<span class="st">"has_free_and_fair_election"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 2 × 14
-  has_free_and_fair_election     n prop_female_president prop_male_president
-  &lt;lgl&gt;                      &lt;int&gt;                 &lt;dbl&gt;               &lt;dbl&gt;
-1 FALSE                       7873               0.00475               0.995
-2 TRUE                        6870               0.0546                0.945
-# ℹ 10 more variables: gap_president_prop &lt;dbl&gt;,
-#   avg_accession_age_female_president &lt;dbl&gt;,
-#   avg_accession_age_male_president &lt;dbl&gt;, gap_president_accession_age &lt;dbl&gt;,
-#   prop_female_monarch &lt;dbl&gt;, prop_male_monarch &lt;dbl&gt;, gap_monarch_prop &lt;dbl&gt;,
-#   avg_accession_age_female_monarch &lt;dbl&gt;,
-#   avg_accession_age_male_monarch &lt;dbl&gt;, gap_monarch_accession_age &lt;dbl&gt;</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co">#In particular, however, we want to see those different values by decade.</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summarise_leadership_gender_gap</span>(<span class="st">"decade"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The proportion of female presidents is higher for democratic countries than non-democratic countries. The proportions of male presidents are similar across democratic and non-democratic countries, but the proportion of male presidents for democratic countries is slightly lower. Non-democratic countries’ female presidents are, on average, about 13.7 years older than male presidents. For democratic countries, that difference is much lower, at 2.81 years.</p>
+<p>The proportion of male monarchs in non-democratic countries is 84.1 percentage points higher than that of female monarchs. However, in democratic countries, the proportions of male and female monarchs are very similar (47.8% and 52.2%, respectively). Monarchs of both gender are much younger on average than presidents, around 30-35 years old. Non-democratic countries seem to have younger monarchs than democratic countries.</p>
+<p>We also want to see these different values by decade.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summarise_leadership_gender_gap</span>(<span class="st">"decade"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 7 × 14
   decade        n prop_female_president prop_male_president gap_president_prop
@@ -300,37 +291,37 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>The proportion of female monarchs was increasing until the 2000-2009 decade, where it slightly dropped from 35.6% to 32.6%. After that, it dropped to 25.3% for the 2010-2020 decade. This is the lowest proportion of female monarchs across all decades; thus the gender gap for monarchs increased from 41.7% in 1950-1959 to 49.5% in 2010-2020. Average accession ages for monarchs are much younger than that of presidents. The typical accession age for a monarch is around 30 years. Female monarchs seem to be slightly younger than male monarchs at accession. The most dramatic difference in accession ages is seen during 2010-2020, where the average male monarch accession age was 44.1, and the average female monarch accession age was 28.6.&nbsp;</p>
 <p><strong>Question 3: (unmodified columns with iteration)</strong></p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>decade_range <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="at">from =</span> <span class="dv">1950</span>, <span class="at">to =</span> <span class="dv">2020</span>, <span class="at">by =</span> <span class="dv">10</span>)</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>suff_results <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">decade =</span> <span class="fu">integer</span>(),</span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>                           <span class="at">gov_type =</span> <span class="fu">character</span>(),</span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>                           <span class="at">prop_full_suffrage =</span> <span class="fu">numeric</span>())</span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> decade_range){</span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>  start_year <span class="ot">&lt;-</span> i</span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>  end_year <span class="ot">&lt;-</span> i <span class="sc">+</span> <span class="dv">9</span></span>
-<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>  dd_decade <span class="ot">&lt;-</span> democracy_data <span class="sc">|&gt;</span></span>
-<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(year <span class="sc">&gt;=</span> start_year <span class="sc">&amp;</span> year <span class="sc">&lt;=</span> end_year)</span>
-<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(j <span class="cf">in</span> <span class="fu">c</span>(<span class="st">"Presidential democracy"</span>, <span class="st">"Royal dictatorship"</span>)){</span>
-<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>  dd_subset <span class="ot">&lt;-</span> dd_decade <span class="sc">|&gt;</span></span>
-<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(regime_category <span class="sc">==</span> j) <span class="sc">|&gt;</span></span>
-<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">distinct</span>(country_name, <span class="at">.keep_all =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(<span class="fu">nrow</span>(dd_subset) <span class="sc">&gt;</span> <span class="dv">0</span>){</span>
-<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>    prop <span class="ot">&lt;-</span> <span class="fu">sum</span>(dd_subset<span class="sc">$</span>has_full_suffrage <span class="sc">==</span> <span class="cn">TRUE</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)<span class="sc">/</span><span class="fu">nrow</span>(dd_subset)</span>
-<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>  <span class="cf">else</span>{</span>
-<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>    prop <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
-<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>  suff_results <span class="ot">&lt;-</span> <span class="fu">rbind</span>(suff_results, <span class="fu">data.frame</span>(</span>
-<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>  <span class="at">decade =</span> i,</span>
-<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>  <span class="at">gov_type =</span> j,</span>
-<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a>  <span class="at">prop_full_suffrage =</span> prop</span>
-<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a>))</span>
-<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a>suff_results</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>decade_range <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="at">from =</span> <span class="dv">1950</span>, <span class="at">to =</span> <span class="dv">2020</span>, <span class="at">by =</span> <span class="dv">10</span>)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>suff_results <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">decade =</span> <span class="fu">integer</span>(),</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>                           <span class="at">gov_type =</span> <span class="fu">character</span>(),</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>                           <span class="at">prop_full_suffrage =</span> <span class="fu">numeric</span>())</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> decade_range){</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  start_year <span class="ot">&lt;-</span> i</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  end_year <span class="ot">&lt;-</span> i <span class="sc">+</span> <span class="dv">9</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>  dd_decade <span class="ot">&lt;-</span> democracy_data <span class="sc">|&gt;</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(year <span class="sc">&gt;=</span> start_year <span class="sc">&amp;</span> year <span class="sc">&lt;=</span> end_year)</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(j <span class="cf">in</span> <span class="fu">c</span>(<span class="st">"Presidential democracy"</span>, <span class="st">"Royal dictatorship"</span>)){</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>  dd_subset <span class="ot">&lt;-</span> dd_decade <span class="sc">|&gt;</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(regime_category <span class="sc">==</span> j) <span class="sc">|&gt;</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">distinct</span>(country_name, <span class="at">.keep_all =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(<span class="fu">nrow</span>(dd_subset) <span class="sc">&gt;</span> <span class="dv">0</span>){</span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>    prop <span class="ot">&lt;-</span> <span class="fu">sum</span>(dd_subset<span class="sc">$</span>has_full_suffrage <span class="sc">==</span> <span class="cn">TRUE</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)<span class="sc">/</span><span class="fu">nrow</span>(dd_subset)</span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>  <span class="cf">else</span>{</span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>    prop <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>  suff_results <span class="ot">&lt;-</span> <span class="fu">rbind</span>(suff_results, <span class="fu">data.frame</span>(</span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>  <span class="at">decade =</span> i,</span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>  <span class="at">gov_type =</span> j,</span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>  <span class="at">prop_full_suffrage =</span> prop</span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>))</span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a>suff_results</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   decade               gov_type prop_full_suffrage
 1    1950 Presidential democracy          0.5000000
@@ -360,45 +351,45 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><p>Required Iteration: going through the data and changing the value of the columns to_democracy and from_democracy</p></li>
 </ul>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co">#arranging by country and year</span></span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>democracy_data <span class="ot">&lt;-</span> democracy_data <span class="sc">|&gt;</span> </span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(country_code, year)</span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="co">#creating new columns to the data, and assigning them to 0 to start with. this is an indicator variable, with 0 being no transition, and 1 meaning there is a transition. for example, if for a country 2000 is a 0 for the to_democracy variable and 2001 there is a 1, there was a transition to democracy in 2001. </span></span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>democracy_data<span class="sc">$</span>to_democracy <span class="ot">&lt;-</span> <span class="dv">0</span></span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>democracy_data<span class="sc">$</span>from_democracy <span class="ot">&lt;-</span> <span class="dv">0</span></span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="co">#to iterate through rows to find out which ones have transitions. starting at 2 because we are comparing to the previous row (2-1 = 1)</span></span>
-<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span><span class="fu">nrow</span>(democracy_data)) {</span>
-<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>  <span class="co">#checking if the two countries that are next to each other in the data are the same </span></span>
-<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (democracy_data<span class="sc">$</span>country_code[i] <span class="sc">==</span> democracy_data<span class="sc">$</span>country_code[i<span class="dv">-1</span>]) { </span>
-<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>    <span class="co">#assigning them to current and previous labels</span></span>
-<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>    current <span class="ot">&lt;-</span> democracy_data<span class="sc">$</span>is_democracy[i]</span>
-<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>    previous <span class="ot">&lt;-</span> democracy_data<span class="sc">$</span>is_democracy[i <span class="sc">-</span> <span class="dv">1</span>]</span>
-<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>    <span class="co">#making sure there are no na values for the is_democracy variable</span></span>
-<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.na</span>(current) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(previous)) {</span>
-<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>      <span class="co">#if this year there is democracy and the previous year there wasn't, it is marked as a transition to democracy</span></span>
-<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (current <span class="sc">&amp;&amp;</span> <span class="sc">!</span>previous) {</span>
-<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a>        democracy_data<span class="sc">$</span>to_democracy[i] <span class="ot">&lt;-</span> <span class="dv">1</span></span>
-<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a>      }</span>
-<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a>      <span class="co">#opposite for this one </span></span>
-<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="sc">!</span>current <span class="sc">&amp;&amp;</span> previous) {</span>
-<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a>        democracy_data<span class="sc">$</span>from_democracy[i] <span class="ot">&lt;-</span> <span class="dv">1</span></span>
-<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a>      }</span>
-<span id="cb17-26"><a href="#cb17-26" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb17-27"><a href="#cb17-27" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb17-28"><a href="#cb17-28" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co">#arranging by country and year</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>democracy_data <span class="ot">&lt;-</span> democracy_data <span class="sc">|&gt;</span> </span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(country_code, year)</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="co">#creating new columns to the data, and assigning them to 0 to start with. this is an indicator variable, with 0 being no transition, and 1 meaning there is a transition. for example, if for a country 2000 is a 0 for the to_democracy variable and 2001 there is a 1, there was a transition to democracy in 2001. </span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>democracy_data<span class="sc">$</span>to_democracy <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>democracy_data<span class="sc">$</span>from_democracy <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="co">#to iterate through rows to find out which ones have transitions. starting at 2 because we are comparing to the previous row (2-1 = 1)</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span><span class="fu">nrow</span>(democracy_data)) {</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>  <span class="co">#checking if the two countries that are next to each other in the data are the same </span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (democracy_data<span class="sc">$</span>country_code[i] <span class="sc">==</span> democracy_data<span class="sc">$</span>country_code[i<span class="dv">-1</span>]) { </span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>    <span class="co">#assigning them to current and previous labels</span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>    current <span class="ot">&lt;-</span> democracy_data<span class="sc">$</span>is_democracy[i]</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>    previous <span class="ot">&lt;-</span> democracy_data<span class="sc">$</span>is_democracy[i <span class="sc">-</span> <span class="dv">1</span>]</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>    <span class="co">#making sure there are no na values for the is_democracy variable</span></span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.na</span>(current) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(previous)) {</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>      <span class="co">#if this year there is democracy and the previous year there wasn't, it is marked as a transition to democracy</span></span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (current <span class="sc">&amp;&amp;</span> <span class="sc">!</span>previous) {</span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>        democracy_data<span class="sc">$</span>to_democracy[i] <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>      <span class="co">#opposite for this one </span></span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="sc">!</span>current <span class="sc">&amp;&amp;</span> previous) {</span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>        democracy_data<span class="sc">$</span>from_democracy[i] <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co">#first grouping by year, and then summarizing the proportion of democracy, and transitions in and out of democracy</span></span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>summary_data <span class="ot">&lt;-</span> democracy_data <span class="sc">|&gt;</span></span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(year) <span class="sc">|&gt;</span></span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(</span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">prop_democracy =</span> <span class="fu">mean</span>(is_democracy, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">transitions_in =</span> <span class="fu">sum</span>(to_democracy, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">transitions_out =</span> <span class="fu">sum</span>(from_democracy, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>summary_data</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co">#first grouping by year, and then summarizing the proportion of democracy, and transitions in and out of democracy</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>summary_data <span class="ot">&lt;-</span> democracy_data <span class="sc">|&gt;</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(year) <span class="sc">|&gt;</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">prop_democracy =</span> <span class="fu">mean</span>(is_democracy, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">transitions_in =</span> <span class="fu">sum</span>(to_democracy, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">transitions_out =</span> <span class="fu">sum</span>(from_democracy, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>summary_data</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 71 × 4
     year prop_democracy transitions_in transitions_out
@@ -415,22 +406,22 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 10  1959          0.319              1               4
 # ℹ 61 more rows</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co">#after viewing this data, it would be helpful to analyze these trends using something like a plot, but looking at it as a table is overwhelming. To counteract this, we can condense the years to 5 or 10 years at the time to get a better look at overall trends. </span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co">#after viewing this data, it would be helpful to analyze these trends using something like a plot, but looking at it as a table is overwhelming. To counteract this, we can condense the years to 5 or 10 years at the time to get a better look at overall trends. </span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co">#we have to create a new column to group the years</span></span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>democracy_data <span class="ot">&lt;-</span> democracy_data <span class="sc">|&gt;</span></span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">ten_yrs =</span> <span class="fu">floor</span>(year <span class="sc">/</span> <span class="dv">10</span>) <span class="sc">*</span> <span class="dv">10</span>)</span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="co">#used the floor function here, that rounds a number down to the greatest integer less than or equal to it, here by 10s.</span></span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>summary_ten_yrs <span class="ot">&lt;-</span> democracy_data <span class="sc">|&gt;</span></span>
-<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(ten_yrs) <span class="sc">|&gt;</span></span>
-<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(</span>
-<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">prop_democracy =</span> <span class="fu">mean</span>(is_democracy, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">transitions_in =</span> <span class="fu">sum</span>(to_democracy, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">transitions_out =</span> <span class="fu">sum</span>(from_democracy, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">"drop"</span></span>
-<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>summary_ten_yrs</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co">#we have to create a new column to group the years</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>democracy_data <span class="ot">&lt;-</span> democracy_data <span class="sc">|&gt;</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">ten_yrs =</span> <span class="fu">floor</span>(year <span class="sc">/</span> <span class="dv">10</span>) <span class="sc">*</span> <span class="dv">10</span>)</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="co">#used the floor function here, that rounds a number down to the greatest integer less than or equal to it, here by 10s.</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>summary_ten_yrs <span class="ot">&lt;-</span> democracy_data <span class="sc">|&gt;</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(ten_yrs) <span class="sc">|&gt;</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">prop_democracy =</span> <span class="fu">mean</span>(is_democracy, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">transitions_in =</span> <span class="fu">sum</span>(to_democracy, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">transitions_out =</span> <span class="fu">sum</span>(from_democracy, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">"drop"</span></span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>summary_ten_yrs</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 8 × 4
   ten_yrs prop_democracy transitions_in transitions_out
@@ -444,12 +435,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 7    2010          0.636             17              16
 8    2020          0.623              0               2</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co">#we also want to look at the correlation between the to and from democracy;s and the proportion of countries that are democratic. </span></span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>cor_matrix <span class="ot">&lt;-</span> summary_data <span class="sc">|&gt;</span></span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(prop_democracy, transitions_in, transitions_out) <span class="sc">%&gt;%</span></span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cor</span>(<span class="at">use =</span> <span class="st">"complete.obs"</span>)</span>
-<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>cor_matrix</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co">#we also want to look at the correlation between the to and from democracy;s and the proportion of countries that are democratic. </span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>cor_matrix <span class="ot">&lt;-</span> summary_data <span class="sc">|&gt;</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(prop_democracy, transitions_in, transitions_out) <span class="sc">%&gt;%</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cor</span>(<span class="at">use =</span> <span class="st">"complete.obs"</span>)</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>cor_matrix</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                prop_democracy transitions_in transitions_out
 prop_democracy      1.00000000    -0.05325185     -0.04730070
