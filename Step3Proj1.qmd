@@ -39,7 +39,8 @@ This proportion is available for most countries from 1997-2020. There are missin
 -   [Variable description from World Bank](https://databank.worldbank.org/metadataglossary/world-development-indicators/series/SG.GEN.PARL.ZS)
 
 ```{r}
-#| eval: true
+#| eval: false
+#| echo: false
 my_key<- "jm6LTqDYOeb7igZXbOxfolhV4eNVaznj2yQqj2EC"
 ```
 
